@@ -172,5 +172,5 @@ class AdminView(APIView):
             user.save()
             serializer = AdminSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except CustomUser.DoesNotExist:
+        except UserDetails.DoesNotExist:
             return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
