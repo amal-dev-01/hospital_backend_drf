@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    # 'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'doctor_app',
 
@@ -157,4 +156,4 @@ SIMPLE_JWT = {
 #     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 #     'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
 #     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-# }
+# } 

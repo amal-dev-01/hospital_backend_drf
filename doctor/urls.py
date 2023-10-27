@@ -26,14 +26,11 @@ urlpatterns = [
     # path('gettoken/',TokenObtainPairView.as_view(),name='token_obtain_pair'),
     # path('refreshtoken/',TokenRefreshView.as_view(),name='token_refresh'),
     # path('verifytoken/',TokenVerifyView.as_view(),name='token_verify'),
-    path('login/',views.Login.as_view(),name='login'),
+    path('login/',views.MyTokenObtainPairView.as_view(),name='login'),
     path('userprofile/',views.UserProfileView.as_view(),name = 'profile'),
     path('doctorlist/',views.UserDoctorView.as_view(),name = 'doctorlist'),
     path('userlist/',views.AdminView.as_view(),name='userlist'),
     path('userlist/<int:pk>/',views.AdminView.as_view(),name='userlist'),
-
-
-
 
 
 ]

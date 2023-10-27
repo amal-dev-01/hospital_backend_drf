@@ -6,7 +6,14 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 #     def get_token(self,user):
 
 
-
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['username'] = user.username
+        token['is_doctor'] = user.is_doctor
+        token['is_admin'] = user.is_admin
+        return token
 
 
 
@@ -39,11 +46,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return data
 
 
-class LoginSerializer(serializers.Serializer):
-  
-    username = serializers.CharField()
-    password = serializers.CharField()
-    
+    # def validate_username(self,)
 
 
 
