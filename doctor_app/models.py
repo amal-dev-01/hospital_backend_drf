@@ -73,7 +73,7 @@ class UserDetails(AbstractBaseUser):
 
 
 class DoctorProfile(models.Model):
-    user = models.ForeignKey(UserDetails, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserDetails, on_delete=models.CASCADE, related_name='doctorprofile')
     hospital = models.CharField(max_length=50,blank=True,null=True)
     department = models.CharField(max_length=50)
     speciality = models.CharField(max_length=50,blank=True,null=True)

@@ -47,11 +47,17 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'doctor_app',
+    'corsheaders',
+
 
 ]
 
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -149,11 +155,4 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS':True,
 }
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Set the token lifetime as needed
-#     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-#     'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
-#     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-#     'SLIDING_TOKEN_LIFETIME': timedelta(days=1),
-#     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
-# } 
+CORS_ALLOW_ALL_ORIGINS = True

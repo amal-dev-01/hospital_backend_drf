@@ -2,8 +2,6 @@ from rest_framework import serializers
 from doctor_app.models import UserDetails,DoctorProfile
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-# class tokenserializer(TokenObtainPairSerializer):
-#     def get_token(self,user):
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -51,18 +49,48 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserDetails
-        fields = ['username', 'first_name', 'last_name', 'email', 'phone']
-
 class DoctorProfileSerializer(serializers.ModelSerializer):
-    user = UserProfileSerializer()  # Use the nested UserProfileSerializer
-
     class Meta:
         model = DoctorProfile
-        fields = ['user', 'hospital', 'department', 'speciality']
+        fields = ('hospital', 'department', 'speciality')
 
+class UserDetailsSerializer(serializers.ModelSerializer):
+    doctor_profile = DoctorProfileSerializer()  # Nest the DoctorProfile serializer within UserDetails serializer
+
+    class Meta:
+        model = UserDetails
+        fields = ('username', 'email', 'first_name', 'last_name', 'phone', 'is_admin', 'is_active', 'is_superadmin', 'is_doctor', 'doctor_profile')
+
+
+
+
+
+
+class DoctorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorProfile
+        fields = [ 'hospital', 'department', 'speciality']
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    doctor = DoctorProfileSerializer() 
+    class Meta:
+        model = UserDetails
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone','doctor   ']
+
+
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = UserDetails
+#         fields = ['username', 'first_name', 'last_name', 'email', 'phone']
+
+# class DoctorProfileSerializer(serializers.ModelSerializer):
+#     user = UserProfileSerializer() 
+
+#     class Meta:
+#         model = DoctorProfile
+#         fields = ['user', 'hospital', 'department', 'speciality']
+    
 
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:

@@ -17,16 +17,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from doctor_app import views
-from rest_framework_simplejwt.views import TokenObtainPairView,TokenRefreshView,TokenVerifyView
+from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/',views.Register.as_view(),name='register'),
-    # path('gettoken/',TokenObtainPairView.as_view(),name='token_obtain_pair'),
-    # path('refreshtoken/',TokenRefreshView.as_view(),name='token_refresh'),
-    # path('verifytoken/',TokenVerifyView.as_view(),name='token_verify'),
     path('login/',views.MyTokenObtainPairView.as_view(),name='login'),
+    path('refresh/',TokenRefreshView.as_view(),name='refersh'),
     path('userprofile/',views.UserProfileView.as_view(),name = 'profile'),
     path('doctorlist/',views.UserDoctorView.as_view(),name = 'doctorlist'),
     path('userlist/',views.AdminView.as_view(),name='userlist'),
@@ -34,3 +32,8 @@ urlpatterns = [
 
 
 ]
+
+
+# source djvenv/bin/activate
+# cd doctor
+# python manage.py runserver

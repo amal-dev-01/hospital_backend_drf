@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser,AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import permission_classes
 
+from .serializers import UserDetailsSerializer
 
 
 
@@ -72,43 +73,82 @@ class UserProfileView(APIView):
     authentication_classes =[JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        try:
-            user = request.user
-            if user.is_doctor:
-                doctor_profile = DoctorProfile.objects.get(user=user)
-                serializer = DoctorProfileSerializer(doctor_profile)
-            else:
-                user_profile = UserDetails.objects.get(id=user.id)
-                serializer = UserProfileSerializer(user_profile)
 
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except UserDetails.DoesNotExist:
-            return Response({'detail': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
-        except DoctorProfile.DoesNotExist:
-            return Response({'detail': 'Doctor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request):
+        user = request.user
+
+        if user.is_doctor:
+            try:
+                doctor_profile = DoctorProfile.objects.get(user=user)
+                doctor_serializer = DoctorProfileSerializer(doctor_profile)
+                data = {
+                    'doctor_profile': doctor_serializer.data,
+                    'username': user.username, 
+                    'first_name': user.first_name ,
+                    'last_name':user.last_name,
+                    'phone':user.phone,
+                    'email':user.email
+                     }
+                return Response(data, status=status.HTTP_200_OK)
+            except DoctorProfile.DoesNotExist:
+                return Response({'detail': 'Doctor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            try:
+                user_serializer = UserDetailsSerializer(user)
+                return Response(user_serializer.data, status=status.HTTP_200_OK)
+            except UserDetails.DoesNotExist:
+                return Response({'detail': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    # def get(self, request):
+    #     try:
+    #         user = request.user
+    #         if user.is_doctor:
+    #             doctor_profile = DoctorProfile.objects.get(user=user)
+    #             serializer = DoctorProfileSerializer(doctor_profile)
+    #         else:
+    #             user_profile = UserDetails.objects.get(id=user.id)
+    #             serializer = UserProfileSerializer(user_profile)
+
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except UserDetails.DoesNotExist:
+    #         return Response({'detail': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    #     except DoctorProfile.DoesNotExist:
+    #         return Response({'detail': 'Doctor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
 
     def patch(self, request):
         try:
             user = request.user
             if user.is_doctor:
                 doctor_profile = DoctorProfile.objects.get(user=user)
-                serializer = DoctorProfileSerializer(doctor_profile, data=request.data, partial=True)  # Use partial=True to allow partial updates
+                doctor_serializer = DoctorProfileSerializer(doctor_profile, data=request.data, partial=True)
+
+                if 'first_name' in request.data:
+                    user.first_name = request.data['first_name']
+                if 'last_name' in request.data:
+                    user.last_name = request.data['last_name']
+                if 'phone' in request.data:
+                    user.phone = request.data['phone']
+                user.save()  
+
+                if doctor_serializer.is_valid():
+                    doctor_serializer.save()
+                    return Response(doctor_serializer.data, status=status.HTTP_200_OK)
+                else:
+                    return Response(doctor_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             else:
                 user_profile = UserDetails.objects.get(id=request.user.id)
-                serializer = UserProfileSerializer(user_profile, data=request.data, partial=True)  # Use partial=True to allow partial updates
+                serializer = UserDetailsSerializer(user_profile, data=request.data, partial=True)
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                if serializer.is_valid():
+                    serializer.save()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except UserDetails.DoesNotExist:
             return Response({'detail': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
         except DoctorProfile.DoesNotExist:
             return Response({'detail': 'Doctor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        
 
     def delete(self, request):
         user = request.user
