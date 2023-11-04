@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
-from doctor_app.serializers import UserRegisterSerializer,UserProfileSerializer,DoctorProfileSerializer,AdminSerializer,MyTokenObtainPairSerializer
+from doctor_app.serializers import (UserRegisterSerializer,UserProfileSerializer,
+DoctorProfileSerializer,AdminSerializer,DoctorListSerializer,
+MyTokenObtainPairSerializer)
 from doctor_app.models import UserDetails,DoctorProfile
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,8 +12,9 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated,IsAdminUser,AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import permission_classes
+from rest_framework.response import Response
 
-from .serializers import UserDetailsSerializer
+
 
 
 
@@ -26,6 +29,8 @@ class Register(APIView):
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
             username = serializer.validated_data.get('username')
+            first_name = serializer.validated_data.get('first_name')
+            last_name = serializer.validated_data.get('last_name')
             password = serializer.validated_data.get('password')
             is_doctor = serializer.validated_data.get('is_doctor')
             # number = serializer.validated_data.get('number')
@@ -34,6 +39,8 @@ class Register(APIView):
                 username = username,
                 password = password,
                 is_doctor=is_doctor,
+                first_name=first_name,
+                last_name=last_name,
             )
             if user.is_doctor:
                 DoctorProfile.objects.create(user=user)
@@ -80,43 +87,33 @@ class UserProfileView(APIView):
         if user.is_doctor:
             try:
                 doctor_profile = DoctorProfile.objects.get(user=user)
-                doctor_serializer = DoctorProfileSerializer(doctor_profile)
                 data = {
-                    'doctor_profile': doctor_serializer.data,
-                    'username': user.username, 
-                    'first_name': user.first_name ,
-                    'last_name':user.last_name,
-                    'phone':user.phone,
-                    'email':user.email
-                     }
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'email': user.email,
+                    'phone': user.phone,
+                    'is_doctor':user.is_doctor,
+                    'doctor_profile': {
+                        'hospital': doctor_profile.hospital,
+                        'department': doctor_profile.department,
+                        'speciality': doctor_profile.speciality,
+                    }
+                }
                 return Response(data, status=status.HTTP_200_OK)
             except DoctorProfile.DoesNotExist:
                 return Response({'detail': 'Doctor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
         else:
             try:
-                user_serializer = UserDetailsSerializer(user)
+                user_serializer = UserProfileSerializer(user)
                 return Response(user_serializer.data, status=status.HTTP_200_OK)
             except UserDetails.DoesNotExist:
                 return Response({'detail': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-    # def get(self, request):
-    #     try:
-    #         user = request.user
-    #         if user.is_doctor:
-    #             doctor_profile = DoctorProfile.objects.get(user=user)
-    #             serializer = DoctorProfileSerializer(doctor_profile)
-    #         else:
-    #             user_profile = UserDetails.objects.get(id=user.id)
-    #             serializer = UserProfileSerializer(user_profile)
-
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     except UserDetails.DoesNotExist:
-    #         return Response({'detail': 'User profile not found.'}, status=status.HTTP_404_NOT_FOUND)
-    #     except DoctorProfile.DoesNotExist:
-    #         return Response({'detail': 'Doctor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
 
     def patch(self, request):
         try:
+            print(request.data)
             user = request.user
             if user.is_doctor:
                 doctor_profile = DoctorProfile.objects.get(user=user)
@@ -129,7 +126,7 @@ class UserProfileView(APIView):
                 if 'phone' in request.data:
                     user.phone = request.data['phone']
                 user.save()  
-
+                  
                 if doctor_serializer.is_valid():
                     doctor_serializer.save()
                     return Response(doctor_serializer.data, status=status.HTTP_200_OK)
@@ -137,7 +134,7 @@ class UserProfileView(APIView):
                     return Response(doctor_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
             else:
                 user_profile = UserDetails.objects.get(id=request.user.id)
-                serializer = UserDetailsSerializer(user_profile, data=request.data, partial=True)
+                serializer = UserProfileSerializer(user_profile, data=request.data, partial=True)
 
                 if serializer.is_valid():
                     serializer.save()
@@ -172,8 +169,8 @@ class UserProfileView(APIView):
 
 class UserDoctorView(APIView):
     def get(self, request):
-        doctors = DoctorProfile.objects.all()  
-        serializer = DoctorProfileSerializer(doctors, many=True)
+        doctors = UserDetails.objects.filter(is_doctor=True)
+        serializer = DoctorListSerializer(doctors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 # {

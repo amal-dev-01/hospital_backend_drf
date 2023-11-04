@@ -11,6 +11,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['username'] = user.username
         token['is_doctor'] = user.is_doctor
         token['is_admin'] = user.is_admin
+        token['is_active'] =user.is_active
         return token
 
 
@@ -21,7 +22,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserDetails
-        fields = ['username','email','password','password2','is_doctor']
+        fields = ['username','email','first_name','last_name','password','password2','is_doctor']
     
 
 
@@ -49,19 +50,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 
-class DoctorProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DoctorProfile
-        fields = ('hospital', 'department', 'speciality')
-
-class UserDetailsSerializer(serializers.ModelSerializer):
-    doctor_profile = DoctorProfileSerializer()  # Nest the DoctorProfile serializer within UserDetails serializer
-
-    class Meta:
-        model = UserDetails
-        fields = ('username', 'email', 'first_name', 'last_name', 'phone', 'is_admin', 'is_active', 'is_superadmin', 'is_doctor', 'doctor_profile')
-
-
 
 
 
@@ -72,27 +60,24 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
         fields = [ 'hospital', 'department', 'speciality']
 
 
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    doctor = DoctorProfileSerializer() 
+    doctor_profile = DoctorProfileSerializer(allow_null=True, required=False)
     class Meta:
         model = UserDetails
-        fields = ['username', 'first_name', 'last_name', 'email', 'phone','doctor   ']
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone','doctor_profile']
 
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = UserDetails
-#         fields = ['username', 'first_name', 'last_name', 'email', 'phone']
 
-# class DoctorProfileSerializer(serializers.ModelSerializer):
-#     user = UserProfileSerializer() 
-
-#     class Meta:
-#         model = DoctorProfile
-#         fields = ['user', 'hospital', 'department', 'speciality']
+class DoctorListSerializer(serializers.ModelSerializer):
+    doctor = DoctorProfileSerializer(source='doctorprofile',many=True) 
+    class Meta:
+        model = UserDetails
+        fields = ['username', 'first_name', 'last_name','doctor']
     
 
 class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserDetails
-        fields = ['username', 'email', 'first_name', 'last_name', 'phone','is_doctor']
+        fields = ['pk','username', 'email', 'first_name', 'last_name', 'phone','is_doctor','is_active','is_admin']

@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 
 class UserManager(BaseUserManager):
-    def create_user(self,username,email,is_doctor=False,password=None):
+    def create_user(self,username,email,is_doctor=False,password=None,first_name=None,last_name=None):
         if not email:
             raise ValueError('User must have an email address')
 
@@ -10,7 +10,8 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             username = username,
             is_doctor=is_doctor,
-         
+            first_name=first_name,
+            last_name = last_name,     
         )
         # user.is_active=True
         user.set_password(password)
@@ -35,14 +36,16 @@ class UserManager(BaseUserManager):
 class UserDetails(AbstractBaseUser):
     username=models.CharField(max_length=50,unique=True)
     email=models.EmailField(max_length=100,unique=True)
-    first_name = models.CharField(max_length=50,null=True,blank=True)
-    last_name = models.CharField(max_length=50,null=True,blank=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
     phone = models.CharField( max_length=50,null=True,blank=True)
     is_admin=models.BooleanField(default=False)    
     is_staff=models.BooleanField(default=False)    
     is_active=models.BooleanField(default=True)   
     is_superadmin=models.BooleanField(default=False)    
     is_doctor = models.BooleanField(default=False,null=True)
+    # doctor_profile = models.OneToOneField('DoctorProfile', on_delete=models.CASCADE, null=True, blank=True)
+
 
     
     USERNAME_FIELD = 'username'
@@ -75,7 +78,7 @@ class UserDetails(AbstractBaseUser):
 class DoctorProfile(models.Model):
     user = models.ForeignKey(UserDetails, on_delete=models.CASCADE, related_name='doctorprofile')
     hospital = models.CharField(max_length=50,blank=True,null=True)
-    department = models.CharField(max_length=50)
+    department = models.CharField(max_length=50,null=True,blank=True)
     speciality = models.CharField(max_length=50,blank=True,null=True)
 
 
