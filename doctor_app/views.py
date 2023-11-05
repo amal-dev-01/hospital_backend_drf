@@ -181,9 +181,9 @@ class UserDoctorView(APIView):
 # }
 #
 
-# class UserDetailListView(ListAPIView):
-#     queryset = UserDetails.objects.all()
-#     serializer_class = UserDetailSerializer
+class UserDetailListView(ListAPIView):
+    queryset = UserDetails.objects.all()
+    serializer_class = UserDetailSerializer
 
 
 class AdminView(APIView):
